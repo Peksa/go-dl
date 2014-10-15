@@ -14,22 +14,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(dl)
+	log.Println("GET: " + dl)
 
 	resp, err := http.Get(dl)
 	if err != nil {
-		log.Fatalf("http.Get => %v", err.Error())
+		log.Println("ERROR: http.Get => %v", err.Error())
+		InternalServerError(w, "Failure fetching URL. Wrong protocol? DNS correct? Connection refused?")
+		return
 	}
 
-	io.Copy(w, resp.Body)
+	_, err = io.Copy(w, resp.Body)
 
 	if err != nil {
-		log.Fatalf("io.Copy => %v", err.Error())
+		log.Println("ERROR: io.Copy  => %v", err.Error())
+		return
 	}
 }
 
-func BadRequest(c http.ResponseWriter) {
-	http.Error(c, "Sad web server is sad :(", http.StatusBadRequest)
+func BadRequest(w http.ResponseWriter) {
+	http.Error(w, "Sad web server is sad :(", http.StatusBadRequest)
+}
+
+func InternalServerError(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusInternalServerError)
 }
 
 func main() {
