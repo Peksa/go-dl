@@ -52,5 +52,5 @@ func InternalServerError(w http.ResponseWriter, message string) {
 
 func main() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
 }
