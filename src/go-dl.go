@@ -10,11 +10,7 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		NotFound(w);
-		return
-	}
-	dl, err := url.Parse(r.FormValue("dl"));
+	dl, err := url.Parse(r.FormValue("url"));
 	if err != nil || !dl.IsAbs() {
 		BadRequest(w)
 		return
@@ -51,6 +47,9 @@ func InternalServerError(w http.ResponseWriter, message string) {
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
+	http.HandleFunc("/dl", handler)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		NotFound(w);
+	})
+	log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
 }
