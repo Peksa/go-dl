@@ -7,22 +7,18 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-
 	dl := r.FormValue("dl")
 	if r.URL.Path != "/" || dl == "" {
 		BadRequest(w)
 		return
 	}
-
 	log.Println("GET: " + dl)
-
 	resp, err := http.Get(dl)
 	if err != nil {
 		log.Println("ERROR: http.Get => %v", err.Error())
 		InternalServerError(w, "Failure fetching URL. Wrong protocol? DNS correct? Connection refused?")
 		return
 	}
-
 	_, err = io.Copy(w, resp.Body)
 
 	if err != nil {
