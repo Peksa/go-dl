@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"crypto/tls"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -115,10 +116,28 @@ func InternalServerError(w http.ResponseWriter, message string) {
 	http.Error(w, message, http.StatusInternalServerError)
 }
 
+func getTlsServer() *http.Server {
+	return &http.Server{
+		Addr: ":10443",
+		TLSConfig: &tls.Config{
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+				tls.TLS_RSA_WITH_RC4_128_SHA,
+			},
+		},
+	}
+}
+
 func main() {
+	srv := getTlsServer()
 	http.HandleFunc("/dl", handler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		NotFound(w)
 	})
-	log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
+	log.Fatal(srv.ListenAndServeTLS("cert.pem", "key.pem"))
 }
