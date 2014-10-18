@@ -1,0 +1,4 @@
+# Use adduser.go to hash passwords
+#
+# demo/demo
+demo:$2a$10$tq1urykzpsra0/CK5x.bXOFC3C/75jsy414wt/BIGfIw91r6CqpH.
