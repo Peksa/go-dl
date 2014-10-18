@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"code.google.com/p/go.crypto/bcrypt"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -9,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -70,7 +73,28 @@ func ExtractCredentials(header string) (string, string, error) {
 }
 
 func ValidateCredentials(username string, password string) bool {
-	return "demo" == username && "demo" == password
+	file, err := os.Open("users.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		str := scanner.Text()
+		if strings.HasPrefix(str, "#") {
+			continue
+		}
+		tokens := strings.Split(str, ":")
+		if tokens[0] == username {
+			return bcrypt.CompareHashAndPassword([]byte(tokens[1]), []byte(password)) == nil
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return false
 }
 
 func BadRequest(w http.ResponseWriter) {
