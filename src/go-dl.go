@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"code.google.com/p/go.crypto/bcrypt"
+	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -13,7 +14,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"crypto/tls"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +36,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	tokens := strings.Split(dl.Path, "/")
 	fileName := tokens[len(tokens)-1]
+	w.Header().Add("Strict-Transport-Security", "max-age=15768000")
 	w.Header().Add("Content-Type", "application/octet-stream")
 	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	_, err = io.Copy(w, resp.Body)
@@ -99,20 +100,24 @@ func ValidateCredentials(username string, password string) bool {
 }
 
 func BadRequest(w http.ResponseWriter) {
+	w.Header().Add("Strict-Transport-Security", "max-age=15768000")
 	http.Error(w, "Sad web server is sad :(", http.StatusBadRequest)
 }
 
 func NotFound(w http.ResponseWriter) {
+	w.Header().Add("Strict-Transport-Security", "max-age=15768000")
 	http.Error(w, "404 nothing here", http.StatusNotFound)
 }
 
 func NotAuthorized(w http.ResponseWriter) {
+	w.Header().Add("Strict-Transport-Security", "max-age=15768000")
 	w.Header().Set("Www-Authenticate", `Basic realm="Credentials please!"`)
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("401 Beep, wrong username or password"))
 }
 
 func InternalServerError(w http.ResponseWriter, message string) {
+	w.Header().Add("Strict-Transport-Security", "max-age=15768000")
 	http.Error(w, message, http.StatusInternalServerError)
 }
 
